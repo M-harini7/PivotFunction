@@ -7,16 +7,6 @@ Generate a pivot table dynamically in the browser
 
 
 
-📁 Project Structure
-project-folder/
-│
-├── index.html        # Main HTML file (UI structure)
-├── style.css         # Styling for the UI
-├── script.js         # JavaScript logic for CSV parsing & pivoting
-└── README.md         # This documentation
-
-
-
 🚀 How to Use
 1. Clone or Download the Repository
 git clone https://github.com/your-username/pivot-table-app.git
