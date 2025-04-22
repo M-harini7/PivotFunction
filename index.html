@@ -6,16 +6,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Upload CSV and Create Pivot Table</h2>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Dynamic Pivot Table</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h2>Upload CSV and Create Pivot Table</h2>
+  <h2>CSV Pivot Magic</h2>
 
   <input type="file" id="csvFile" accept=".csv">
   <button id="goLastRowBtn" onclick="scrollToLastRow()" style="display: none;">Go to Last Row</button>
@@ -35,8 +26,6 @@
       <select id="groupByColsSelect" multiple size="4"></select>
       <button type="button" onclick="clearSelection('groupByColsSelect')">Clear</button>
     </div>
-
-
 
 <div class="control-group">
   <label>Measures:</label>
@@ -49,52 +38,6 @@
 
     <!-- <button id="togglePivotBtn" style="display: none;">Hide Pivot</button> -->
 
-  </div>
-
-  <div id="tableContainer"></div>
-  <div id="pivotContainer"></div>
-
-  <!-- "Go to First Row" and "Go to Last Row" buttons are at the end of the page -->
-  <button id="goFirstRowBtn" onclick="scrollToFirstRow()" style="display: none;">Go to First Row</button>
-  <!--<button id="goLastRowBtn" onclick="scrollToLastRow()" style="display: none;">Go to Last Row</button>-->
-
-  <script src="script.js"></script>
-</body>
-</html>
-  <input type="file" id="csvFile" accept=".csv">
-  <button id="goLastRowBtn" onclick="scrollToLastRow()" style="display: none;">Go to Last Row</button>
-  <button id="toggleTableBtn" style="display: none;">Show Table</button>
-  <button id="togglePivotBtn" style="display: none;">Show Pivot</button>
-
-
-  <div id="pivotControls" style="display: none;">
-    <div class="control-group">
-      <label>Group By Rows:</label>
-      <select id="groupByRowsSelect" multiple size="4"></select>
-      <button type="button" onclick="clearSelection('groupByRowsSelect')">Clear</button>
-    </div>
-
-    <div class="control-group">
-      <label>Group By Columns:</label>
-      <select id="groupByColsSelect" multiple size="4"></select>
-      <button type="button" onclick="clearSelection('groupByColsSelect')">Clear</button>
-    </div>
-
-    <div class="control-group">
-      <label>Value Column:</label>
-      <select id="valueColumnSelect"></select>
-    </div>
-
-    <div class="control-group">
-      <label>Aggregation:</label>
-      <select id="aggregationSelect">
-        <option value="sum">Sum</option>
-        <option value="avg">Average</option>
-        <option value="count">Count</option>
-      </select>
-    </div>
-
-    <button id="pivotBtn">Generate Pivot</button>
   </div>
 
   <div id="tableContainer"></div>
