@@ -261,173 +261,159 @@ pivotBtn.addEventListener('click', () => {
     pivotBtn.textContent = isVisible ? 'Show Pivot' : 'Hide Pivot';
     return;
   }
-    const rowFields = Array.from(document.getElementById('groupByRowsSelect').selectedOptions).map(o => o.value);
-    const colFields = Array.from(document.getElementById('groupByColsSelect').selectedOptions).map(o => o.value);
 
-    const measureSets = Array.from(document.querySelectorAll('.measure-set')).map(set => ({
-      field: set.querySelector('.valueSelect').value,
-      agg: set.querySelector('.aggSelect').value
-    }));
+  const rowFields = Array.from(document.getElementById('groupByRowsSelect').selectedOptions).map(o => o.value);
+  const colFields = Array.from(document.getElementById('groupByColsSelect').selectedOptions).map(o => o.value);
 
-    if (measureSets.length === 0) return alert('Please add at least one measure.');
+  const measureSets = Array.from(document.querySelectorAll('.measure-set')).map(set => ({
+    field: set.querySelector('.valueSelect').value,
+    agg: set.querySelector('.aggSelect').value
+  }));
 
-    const pivotData = {};
-    const rowKeys = new Set();
-    const colKeys = new Set();
+  if (measureSets.length === 0) return alert('Please add at least one measure.');
 
-    const rowTotals = {};
-    const colTotals = {};
-    const grandTotals = {};
+  const pivotData = {};
+  const rowKeys = new Set();
+  const colKeys = new Set();
 
-    originalData.forEach(row => {
-      const rowKey = rowFields.map(f => row[f] || 'N/A').join(' | ') || 'Total';
-      const colKey = colFields.map(f => row[f] || 'N/A').join(' | ') || 'Total';
+  const rowTotals = {};
+  const colTotals = {};
+  const grandTotals = {};
 
-      if (!pivotData[rowKey]) pivotData[rowKey] = {};
-      if (!pivotData[rowKey][colKey]) pivotData[rowKey][colKey] = {};
+  originalData.forEach(row => {
+    const rowKey = rowFields.map(f => row[f] || 'N/A').join(' | ') || 'Total';
+    const colKey = colFields.map(f => row[f] || 'N/A').join(' | ') || 'Total';
 
-      measureSets.forEach(({ field }) => {
-        if (!pivotData[rowKey][colKey][field]) pivotData[rowKey][colKey][field] = [];
-        pivotData[rowKey][colKey][field].push(row[field]);
+    if (!pivotData[rowKey]) pivotData[rowKey] = {};
+    if (!pivotData[rowKey][colKey]) pivotData[rowKey][colKey] = {};
 
-        if (!rowTotals[rowKey]) rowTotals[rowKey] = {};
-        if (!rowTotals[rowKey][field]) rowTotals[rowKey][field] = [];
-        rowTotals[rowKey][field].push(row[field]);
+    measureSets.forEach(({ field }) => {
+      if (!pivotData[rowKey][colKey][field]) pivotData[rowKey][colKey][field] = [];
+      pivotData[rowKey][colKey][field].push(row[field]);
 
-        if (!colTotals[colKey]) colTotals[colKey] = {};
-        if (!colTotals[colKey][field]) colTotals[colKey][field] = [];
-        colTotals[colKey][field].push(row[field]);
+      if (!rowTotals[rowKey]) rowTotals[rowKey] = {};
+      if (!rowTotals[rowKey][field]) rowTotals[rowKey][field] = [];
+      rowTotals[rowKey][field].push(row[field]);
 
-        if (!grandTotals[field]) grandTotals[field] = [];
-        grandTotals[field].push(row[field]);
-      });
+      if (!colTotals[colKey]) colTotals[colKey] = {};
+      if (!colTotals[colKey][field]) colTotals[colKey][field] = [];
+      colTotals[colKey][field].push(row[field]);
 
-      rowKeys.add(rowKey);
-      colKeys.add(colKey);
+      if (!grandTotals[field]) grandTotals[field] = [];
+      grandTotals[field].push(row[field]);
     });
 
-    pivotContainer.innerHTML = '';
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const headRow = document.createElement('tr');
+    rowKeys.add(rowKey);
+    colKeys.add(colKey);
+  });
 
-    headRow.innerHTML = `<th>${rowFields.join(' | ') || 'Row'}</th>`;
-    const colKeysSorted = [...colKeys];
+  pivotContainer.innerHTML = '';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
 
-    colKeysSorted.forEach(col => {
-      measureSets.forEach(({ field, agg }) => {
-        const th = document.createElement('th');
-        th.textContent = `${col} | ${field} (${agg})`;
-        headRow.appendChild(th);
-      });
-    });
+  headRow.innerHTML = `<th>${rowFields.join(' | ') || 'Row'}</th>`;
+  const colKeysSorted = [...colKeys];
 
+  colKeysSorted.forEach(col => {
     measureSets.forEach(({ field, agg }) => {
       const th = document.createElement('th');
-      th.textContent = `Grand Total | ${field} (${agg})`;
+      th.textContent = `${col} | ${field} (${agg})`;
       headRow.appendChild(th);
     });
+  });
 
-    thead.appendChild(headRow);
-    table.appendChild(thead);
+  measureSets.forEach(({ field, agg }) => {
+    const th = document.createElement('th');
+    th.textContent = `Grand Total | ${field} (${agg})`;
+    headRow.appendChild(th);
+  });
 
-    const tbody = document.createElement('tbody');
-    const rowKeysSorted = [...rowKeys];
+  thead.appendChild(headRow);
+  table.appendChild(thead);
 
-    rowKeysSorted.forEach(rowKey => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${rowKey}</td>`;
+  const tbody = document.createElement('tbody');
+  const rowKeysSorted = [...rowKeys];
 
-      colKeysSorted.forEach(colKey => {
-        measureSets.forEach(({ field, agg }) => {
-          const vals = (pivotData[rowKey]?.[colKey]?.[field]) || [];
-          const aggVal = vals.length ? aggregate(vals, agg) : 0;
-          const td = document.createElement('td');
-          td.textContent = Number(aggVal).toFixed(2);
-          tr.appendChild(td);
-        });
-      });
-
-      measureSets.forEach(({ field, agg }) => {
-        const vals = rowTotals[rowKey]?.[field] || [];
-        const aggVal = vals.length ? aggregate(vals, agg) : 0;
-        const td = document.createElement('td');
-        td.textContent = Number(aggVal).toFixed(2);
-        td.style.fontWeight = 'bold';
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    const totalRow = document.createElement('tr');
-    totalRow.innerHTML = `<td><strong>Grand Total</strong></td>`;
+  rowKeysSorted.forEach(rowKey => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${rowKey}</td>`;
 
     colKeysSorted.forEach(colKey => {
       measureSets.forEach(({ field, agg }) => {
-        const vals = colTotals[colKey]?.[field] || [];
+        const vals = (pivotData[rowKey]?.[colKey]?.[field]) || [];
         const aggVal = vals.length ? aggregate(vals, agg) : 0;
         const td = document.createElement('td');
         td.textContent = Number(aggVal).toFixed(2);
-        td.style.fontWeight = 'bold';
-        totalRow.appendChild(td);
+        tr.appendChild(td);
       });
     });
 
     measureSets.forEach(({ field, agg }) => {
-      const vals = grandTotals[field] || [];
+      const vals = rowTotals[rowKey]?.[field] || [];
       const aggVal = vals.length ? aggregate(vals, agg) : 0;
       const td = document.createElement('td');
       td.textContent = Number(aggVal).toFixed(2);
       td.style.fontWeight = 'bold';
-      td.style.backgroundColor = '#f8f8f8';
-      totalRow.appendChild(td);
+      tr.appendChild(td);
     });
 
-    tbody.appendChild(totalRow);
-    table.appendChild(tbody);
-    pivotContainer.appendChild(table);
+    tbody.appendChild(tr);
+  });
 
-    pivotGenerated = true;
-    pivotContainer.style.display = 'block';
-    pivotBtn.textContent = 'Hide Pivot';
+  // Grand Total Row
+  const totalRow = document.createElement('tr');
+  totalRow.innerHTML = `<td><strong>Grand Total</strong></td>`;
 
+  colKeysSorted.forEach(colKey => {
+    measureSets.forEach(({ field, agg }) => {
+      const vals = colTotals[colKey]?.[field] || [];
+      const aggVal = vals.length ? aggregate(vals, agg) : 0;
+      const td = document.createElement('td');
+      td.textContent = Number(aggVal).toFixed(2);
+      td.style.fontWeight = 'bold';
+      totalRow.appendChild(td);
+    });
+  });
+
+  measureSets.forEach(({ field, agg }) => {
+    const vals = grandTotals[field] || [];
+    const aggVal = vals.length ? aggregate(vals, agg) : 0;
+    const td = document.createElement('td');
+    td.textContent = Number(aggVal).toFixed(2);
+    td.style.fontWeight = 'bold';
+    td.style.backgroundColor = '#f8f8f8';
+    totalRow.appendChild(td);
+  });
+
+  tbody.appendChild(totalRow);
+  table.appendChild(tbody);
+  pivotContainer.appendChild(table);
+
+  // Finalize view toggle
   pivotGenerated = true;
   pivotContainer.style.display = 'block';
   pivotBtn.textContent = 'Hide Pivot';
 });
 
+
 function resetPivot() {
-  // Clear selected options for rows and columns
-  ['groupByRowsSelect', 'groupByColsSelect'].forEach(id => {
-    const select = document.getElementById(id);
-    for (let option of select.options) {
-      option.selected = false;
-    }
-  });
-
-  // Clear all measure fields
-  const measuresContainer = document.getElementById('multiMeasuresContainer');
-  measuresContainer.innerHTML = '';
-
-  // Optionally add one default measure input (or leave empty)
-  // addMeasure();
-
-  // Clear pivot output
-  document.getElementById('pivotContainer').innerHTML = '';
-
-  // Hide both containers
-  document.getElementById('pivotContainer').style.display = 'none';
-  document.getElementById('tableContainer').style.display = 'none'; // <-- updated from block to none
-
-  // Hide control buttons
-  document.getElementById('togglePivotBtn').style.display = 'none';
-  document.getElementById('toggleTableBtn').style.display = 'inline-block';
-  document.getElementById('toggleTableBtn').textContent = 'Show Table';
-
-  // Hide navigation buttons
+  // Clear the pivot table container
   document.getElementById('goFirstRowBtn').style.display = 'none';
   document.getElementById('goLastRowBtn').style.display = 'none';
+  document.getElementById('multiMeasuresContainer').innerHTML = '';
+  pivotContainer.innerHTML = '';
+  pivotContainer.style.display = 'none';
+
+  // Reset pivot state and button label
+  pivotGenerated = false;
+  pivotBtn.textContent = 'Show Pivot';
+  //const tableContainer = document.getElementById('tableContainer');
+  tableContainer.innerHTML = '';
+  tableContainer.style.display = 'none';
+  tableContainer.textContent='Show Table';
+  // Optionally clear other UI selections if needed:
+  document.getElementById('groupByRowsSelect').selectedIndex = -1;
+  document.getElementById('groupByColsSelect').selectedIndex = -1;
+  document.getElementById('measuresContainer').innerHTML = '';
 }
-
-
